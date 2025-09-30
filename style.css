@@ -1,0 +1,101 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+.container {
+    display: grid;
+    grid-template-columns: 0.8fr 1.6fr 0.8fr;
+    grid-template-rows: 0.8fr 1fr 1fr 0.8fr;
+    grid-template-areas:
+        "b1 b1 b1"
+        "b2 b3 b4"
+        "b2 b3 b5"
+        "b2 b6 b6";
+    gap: 5px;
+    height: 100vh;
+}
+
+h3 {
+    margin: 5px 0;
+}
+
+ol {
+    margin: 0;
+}
+
+ul {
+    margin: 0;
+}
+
+.block {
+    display: flex;
+    font-size: 20px;
+    position: relative;
+    padding: 10px;
+    border: 1px solid #000;
+    justify-content: flex-start;
+    align-items: flex-start;
+}
+
+.block1 {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: end;
+    text-align: right;
+
+}
+
+.block2 {
+    flex-direction: column; 
+    justify-content: center;
+    align-items: flex-end;
+    text-align: right; 
+}
+
+.block3 {
+    font-size: 25px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.block4, .block5 {
+    justify-content: flex-start;
+    align-items: center;
+    text-align: left;
+}
+
+.block6 {
+    justify-content: flex-end;
+    align-items: center;
+    text-align: right;
+}
+
+
+.label-x {
+    position: absolute;
+    top: 80px;
+    left: 25px;
+    background: #fff;
+    border: 1px solid #000;
+    padding: 3px 8px;
+    font-weight: bold;
+}
+
+.label-y {
+    position: absolute;
+    top: 0px;
+    left: 25px;
+    background: #fff;
+    border: 1px solid #000;
+    padding: 3px 8px;
+    font-weight: bold;
+}
+
+.block1 { grid-area: b1; background: #a8c7f7; }
+.block2 { grid-area: b2; background: #d8eacc; }
+.block3 { grid-area: b3; background: #fff; }
+.block4 { grid-area: b4; background: #d8eacc; }
+.block5 { grid-area: b5; background: #f7d8cc; }
+.block6 { grid-area: b6; background: #a8c7f7; }
