@@ -43,21 +43,25 @@ $menu = [
     <meta charset="UTF-8">
     <title>Сторінка №3</title>
     <link rel="stylesheet" href="style.css?v=2">
+    <script src="script.js" defer></script>
+    <script> 
+        const pageLoadStartTime = performance.now();
+    </script>
 </head>
 <body>
 <div class="container">
 
     <div class="block block1">
         <div class="label-x"><?= $x ?></div>
-        <?= $texts[1] ?>
+        <span class = "editable-content"><?= $texts[1] ?></span>
     </div>
 
     <div class="block block2">
-        <?= $texts[2] ?>
+        <span class = "editable-content"><?= $texts[2] ?></span>
     </div>
 
     <div class="block block3">
-        <h3> <?= $texts[3] ?> </h3>
+        <h3> <span class = "editable-content"><?= $texts[3] ?></span> </h3>
         <ul>
             <?php foreach ($menu as $link => $label): ?>
                 <li><a href="<?= $link ?>"><?= $label ?></a></li>
@@ -69,11 +73,14 @@ $menu = [
         <img src="<?= $imgage ?>" alt="Image" width="150" height="150">
     </div>
     
-    <div class="block block5"><?= $texts[5] ?></div>
+
+    <div class="block block5">
+        <span class = "editable-content"><?= $texts[5] ?></span>
+    </div>
 
     <div class="block block6">
         <div class="label-y"><?= $y ?></div>
-        <?= $texts[6] ?>
+        <span class = "editable-content"><?= $texts[6] ?></span>
     </div>
 
 </div>
