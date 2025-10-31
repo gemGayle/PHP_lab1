@@ -1,77 +1,70 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // load timers 
+    const pageLoadEndTime = performance.now();
+    const clientLoadTime = (pageLoadEndTime - pageLoadStartTime).toFixed(2);
+    const totalLoadTime = (parseFloat(phpGenerationTime) + parseFloat(clientLoadTime)).toFixed(2);
+    
+    const timerDiv = document.createElement('div');
+    timerDiv.innerHTML = `
+        <div style="margin-bottom:8px;font-weight:bold;">Час завантаження:</div>
+        <div>Сервер: ${phpGenerationTime} мс</div>
+        <div>БД: ${phpDbTime || '0'} мс</div>
+        <div>Клієнт: ${clientLoadTime} мс</div>
+        <div style="font-weight:bold;">Загалом: ${totalLoadTime} мс</div>
+    `;
+    timerDiv.style.cssText = `
+        position:fixed; top:10px; left:10px; padding:15px; 
+        background:rgba(0,0,0,0.9); color:white; border-radius:8px;
+        font-family:Arial; font-size:14px; z-index:1000;
+    `;
+    document.body.appendChild(timerDiv);
+    setTimeout(() => timerDiv.remove(), 2500);
 
-    const editableBlocks = document.querySelectorAll('.block');
+    // blocks editing
+    const blocks = document.querySelectorAll('.block');
+    const modal = document.getElementById('editModal');
+    const closeBtn = document.querySelector('.close');
+    const cancelBtn = document.querySelector('.btn-cancel');
+    const form = document.getElementById('editForm');
+    const textarea = document.getElementById('editContent');
+    const pageNameInput = document.getElementById('editPageName');
+    const blockIdInput = document.getElementById('editBlockId');
 
-    function getPageName() {
-        let pageName = window.location.pathname.split('/').pop();
-        if (pageName === '') {
-            pageName = 'index.php';
-        }
-        return pageName;
-    }    
-
-    function loadContentFromStorage() {
-        const pageName = getPageName();
-
-        editableBlocks.forEach((block, index) => {
-            const editableSpan = block.querySelector('.editable-content');
+    // edit window open
+    blocks.forEach(block => {
+        block.addEventListener('click', function(e) {
+            if (e.target.tagName === 'A' || e.target.closest('a')) return;
             
-            if (editableSpan) {
-                const key = `${pageName}-block-${index}`;
-                const savedContent = localStorage.getItem(key);
+            const content = this.querySelector('.editable-content');
+            if (!content) return;
 
-                if (savedContent) {
-                    editableSpan.innerHTML = savedContent;
-                }
-            }
+            pageNameInput.value = currentPageName;
+            blockIdInput.value = this.dataset.blockId;
+            textarea.value = content.innerHTML;
+            modal.style.display = 'block';
         });
-    }
-
-    function handleBlockClick(event) {
-        const block = event.currentTarget;
-        
-        const editableSpan = block.querySelector('.editable-content');
-        
-        if (!editableSpan) {
-            return;
-        }
-        
-        if (event.target.tagName === 'A' || event.target.closest('a')) {
-            return;
-        }
-
-        const pageName = getPageName();
-        const blockIndex = Array.from(editableBlocks).indexOf(block);
-        const key = `${pageName}-block-${blockIndex}`;
-
-        const newContent = prompt("Введіть новий вміст:", editableSpan.innerHTML);
-
-        if (newContent !== null) {
-            editableSpan.innerHTML = newContent;
-            localStorage.setItem(key, newContent);
-        }
-    }
-
-    editableBlocks.forEach(block => {
-        block.addEventListener('click', handleBlockClick);
     });
 
-    loadContentFromStorage();
+    // edit window close
+    closeBtn.addEventListener('click', () => modal.style.display = 'none');
+    cancelBtn.addEventListener('click', () => modal.style.display = 'none');
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) modal.style.display = 'none';
+    });
 
-    function showPageLoadTime() {
-        const pageLoadEndTime = performance.now();
-        const totalLoadTime = (pageLoadEndTime - pageLoadStartTime).toFixed(2);
-        const timerDiv = document.createElement('div');
-        timerDiv.style.position = 'fixed';
-        timerDiv.style.top = '10px';
-        timerDiv.style.left = '10px';
-        timerDiv.style.padding = '5px 10px';
-        timerDiv.style.backgroundColor = 'rgba(0,0,0,0.7)';
-        timerDiv.style.color = 'white';
-        timerDiv.style.borderRadius = '5px';
-        timerDiv.style.fontSize = '14px';
-        timerDiv.textContent = `Час формування сторінки: ${totalLoadTime} мс`;
-        document.body.appendChild(timerDiv);
-    }
-    showPageLoadTime();
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const response = await fetch('', {
+            method: 'POST',
+            body: new FormData(this)
+        });
+
+        if (response.ok) {
+            const block = document.querySelector(`[data-block-id="${blockIdInput.value}"]`);
+            const content = block.querySelector('.editable-content');
+            content.innerHTML = textarea.value;
+            modal.style.display = 'none';
+        }
+    });
 });

@@ -1,8 +1,7 @@
 <?php
-$x = "Студент ІО-33";
-$y = "Андреєв Олександр";
+include 'header.php';
 
-$texts = [
+$defaultTexts = [
     1 => 'Arch Linux — це дистрибутив, орієнтований на досвідчених користувачів, які хочуть повністю контролювати свою систему. 
     <br>Його філософія — "Keep It Simple", тобто надавати мінімальне базове середовище,
     <br>яке користувач сам може налаштувати та розширювати під свої потреби.
@@ -25,42 +24,29 @@ $texts = [
     6 => "Fedora — дистрибутив, який підтримується спільнотою і компанією Red Hat.
     <br>Він орієнтований на сучасні технології та часто слугує тестовим майданчиком 
     <br>для нових рішень, які пізніше потрапляють у Red Hat Enterprise Linux.",
-
 ];
 
-$menu = [
-    "index.php" => "Головна",
-    "page1.php" => "Сторінка 1",
-    "page2.php" => "Сторінка 2",
-    "page3.php" => "Сторінка 3",
-    "page4.php" => "Сторінка 4"
-];
+//db content
+$texts = [];
+for ($i = 1; $i <= 6; $i++) {
+    $blockId = 'block' . $i;
+    $texts[$i] = getContentFromDB($pdo, $pageName, $blockId, $defaultTexts[$i]);
+}
+
+$pageGenerationTime = round((microtime(true) - $pageGenerationStart) * 1000, 2);
 ?>
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-    <meta charset="UTF-8">
-    <title>Лабораторна робота №1</title>
-    <link rel="stylesheet" href="style.css?v=2">
-    <script src="script.js" defer></script>
-    <script> 
-        const pageLoadStartTime = performance.now();
-    </script>
-</head>
-<body>
-<div class="container">
 
-    <div class="block block1">
+    <div class="block block1" data-block-id="block1">
         <div class="label-x"><?=$x ?></div>
-        <span class = "editable-content"><?= $texts[1] ?></span>
+        <span class="editable-content"><?= $texts[1] ?></span>
     </div>
 
-    <div class="block block2">
-        <span class = "editable-content"><?= $texts[2] ?></span>
+    <div class="block block2" data-block-id="block2">
+        <span class="editable-content"><?= $texts[2] ?></span>
     </div>
 
-    <div class="block block3">
-        <h3><span class = "editable-content"><?= $texts[3] ?></span></h3>
+    <div class="block block3" data-block-id="block3">
+        <h3><span class="editable-content"><?= $texts[3] ?></span></h3>
         <ul>
             <?php foreach ($menu as $link => $label): ?>
                 <li><a href="<?= $link ?>"><?= $label ?></a></li>
@@ -68,20 +54,17 @@ $menu = [
         </ul>
     </div>
 
-    <div class="block block4">
-        <span class = "editable-content"><?= $texts[4] ?></span>
+    <div class="block block4" data-block-id="block4">
+        <span class="editable-content"><?= $texts[4] ?></span>
     </div>
 
-    <div class="block block5">
-        <span class = "editable-content"><?= $texts[5] ?></span>
+    <div class="block block5" data-block-id="block5">
+        <span class="editable-content"><?= $texts[5] ?></span>
     </div>
 
-    <div class="block block6">
+    <div class="block block6" data-block-id="block6">
         <div class="label-y"><?=$y ?></div>
-        <span class = "editable-content"><?= $texts[6] ?></span>
+        <span class="editable-content"><?= $texts[6] ?></span>
     </div>
-</div>
-</div>
 
-</body>
-</html>
+<?php include 'footer.php'?>
