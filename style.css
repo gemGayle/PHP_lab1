@@ -5,14 +5,14 @@ body {
 .container {
     display: grid;
     grid-template-columns: 0.8fr 1.6fr 0.8fr;
-    grid-template-rows: 0.8fr 1fr 1fr 0.8fr;
+    grid-template-rows: auto auto auto auto;
     grid-template-areas:
         "b1 b1 b1"
         "b2 b3 b4"
         "b2 b3 b5"
         "b2 b6 b6";
     gap: 5px;
-    height: 100vh;
+    min-height: 100vh;
 }
 
 h3 {
@@ -31,9 +31,8 @@ ol, ul {
     border: 1px solid #000;
     justify-content: flex-start;
     align-items: flex-start;
-    overflow: auto;
     min-width: 0;
-    min-height: 0;
+    min-height: 200px;
     transition: background-color 0.3s;
     cursor: pointer;
 }
