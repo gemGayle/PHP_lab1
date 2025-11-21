@@ -138,16 +138,27 @@ document.addEventListener('DOMContentLoaded', function() {
             if (deleteAllBtn) {
                 deleteAllBtn.addEventListener('click', async () => {
                         try {
-                            const resp = await fetch('api.php', { method: 'DELETE' });
+                            let resp;
+                            try {
+                                resp = await fetch('api.php', { method: 'DELETE' });
+                            } catch (networkErr) {
+                                resp = await fetch('api.php?_method=DELETE', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ action: 'delete' })
+                                });
+                            }
+
                             const result = await resp.json().catch(() => ({}));
                             if (!resp.ok || result.status !== 'success') {
                                 const msg = (result && (result.message || result.error)) ? (result.message || result.error) : 'Server error';
                                 throw new Error(msg);
                             }
+
                             itemsContainer.innerHTML = '';
                             const msg = result.message || 'Набір видалено.';
                             statusMessage.textContent = msg;
-                            if (typeof msg === 'string' && msg.toLowerCase().includes('нема') || msg.includes('Немає')) {
+                            if (typeof msg === 'string' && (msg.toLowerCase().includes('нема') || msg.includes('Немає'))) {
                                 statusMessage.style.color = 'red';
                             } else {
                                 statusMessage.style.color = 'green';
