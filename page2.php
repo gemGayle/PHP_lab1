@@ -3,35 +3,6 @@ include 'header.php';
 
 $list_ul = ["Arch", "NixOS", "Mint", "Fedora"];
 
-$defaultTexts = [
-    1 => 'Arch Linux — це дистрибутив, орієнтований на досвідчених користувачів, які хочуть повністю контролювати свою систему. 
-    <br>Його філософія — "Keep It Simple", тобто надавати мінімальне базове середовище,
-    <br>яке користувач сам може налаштувати та розширювати під свої потреби.
-    <br>Arch відомий своїм пакетним менеджером pacman та величезним репозиторієм користувацьких пакетів (AUR).',
-    
-    2 => "Mаркований список:",
-    
-    3 => "Сторінка №2",
-    
-    4 => "Linux Mint — це дистрибутив, який робить акцент на простоті використання.
-    Він створений на основі Ubuntu (або Debian у деяких редакціях) і орієнтований на новачків у Linux. 
-    Mint має знайомий і зручний інтерфейс (Cinnamon, MATE або XFCE), що робить його хорошою альтернативою Windows.",
-    
-    5 => "Ubuntu — один із найпопулярніших дистрибутивів Linux, розроблений компанією Canonical. 
-    Він базується на Debian, але пропонує зручніший процес встановлення та більш сучасні пакети. 
-    Ubuntu відомий своєю стабільністю та великою спільнотою, завдяки чому легко знайти підтримку й документацію.",
-    
-    6 => "Fedora — дистрибутив, який підтримується спільнотою і компанією Red Hat.
-    <br>Він орієнтований на сучасні технології та часто слугує тестовим майданчиком 
-    <br>для нових рішень, які пізніше потрапляють у Red Hat Enterprise Linux."
-];
-
-$texts = [];
-for ($i = 1; $i <= 6; $i++) {
-    $blockId = 'block' . $i;
-    $texts[$i] = getContentFromDB($pdo, $pageName, $blockId, $defaultTexts[$i]);
-}
-
 ?>
     <div class="block block1" data-block-id="block1">
         <div class="label-x"><?= $x ?></div>
@@ -39,7 +10,8 @@ for ($i = 1; $i <= 6; $i++) {
     </div>
 
     <div class="block block2" data-block-id="block2">
-        <h3> <span class = "editable-content"><?= $texts[2] ?></span> </h3>
+        <span class = "editable-content"><?= $texts[2] ?></span> 
+        <h3>Маркований список</h3>
         <ul>
             <?php foreach ($list_ul as $item): ?>
                 <li><?= $item ?></li>
@@ -48,7 +20,7 @@ for ($i = 1; $i <= 6; $i++) {
     </div>
 
     <div class="block block3" data-block-id="block3">
-        <h3> <span class = "editable-content"><?= $texts[3] ?></span> </h3>
+        <h3> <span class = "editable-content">Сторінка №2</span> </h3>
         <ul>
             <?php foreach ($menu as $link => $label): ?>
                 <li><a href="<?= $link ?>"><?= $label ?></a></li>
