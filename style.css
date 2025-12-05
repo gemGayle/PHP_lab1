@@ -373,3 +373,118 @@ ol, ul {
     box-shadow: 0 0 8px rgba(0,0,0,0.2);
     transform: scale(1.03); 
 }
+
+/* lab5 page */
+#work-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.work-hidden {
+    display: none !important;
+}
+
+/* work area - 80% */
+#work-layer {
+    width: 80vw;
+    height: 80vh;
+    background: #fdfdfd;
+    border: 2px dashed #333;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+/* log controls block */
+#work-controls {
+    flex: 0 0 50px; 
+    display: flex;
+    align-items: center;
+    padding: 5px 10px;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+#work-messages {
+    flex: 1;
+    font-size: 14px;
+    line-height: 1.2;
+    max-height: 100%;
+    overflow-y: auto;
+}
+
+#work-buttons {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+/* anim area */
+#anim-area {
+    flex: 1;
+    margin: 0 5px 5px 5px;
+    border: 5px solid blue;
+    position: relative;
+    background-image: url('texture.png');
+    background-size: 32px 32px;
+    background-repeat: repeat;
+}
+
+/* balls */
+.ball {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+}
+
+.ball-red {
+    background: red;
+}
+
+.ball-green {
+    background: green;
+}
+
+/* logs */
+#lab5-block3-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#lab5-results_wrapper {
+    max-height: 300px;
+    overflow-y: auto;
+    overflow-x: auto;
+    border: 1px solid #aaa;
+    padding: 5px;
+    background: #fff;
+    margin-top: 15px;
+    width: 100%;
+}
+
+#lab5-results_wrapper.results-hidden {
+    display: none;
+}
+
+#lab5-results table {
+    overflow-x: hidden;
+    border-collapse: collapse;
+    font-size: 14px;
+    width: 100%;    
+}
+
+#lab5-results th, #lab5-results td {
+    border: 1px solid #444;
+    padding: 4px 6px;
+}
+
+#lab5-results th {
+    background: #eee;
+}

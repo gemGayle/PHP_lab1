@@ -243,4 +243,297 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // LAB 5
+    if (typeof currentPageName !== 'undefined' && currentPageName === 'lab5.php') {
+        const playBtn = document.getElementById('playAnimBtn');
+        const workOverlay = document.getElementById('work-overlay');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const reloadBtn = document.getElementById('reloadBtn');
+        const closeBtn = document.getElementById('closeBtn');
+        const animArea = document.getElementById('anim-area');
+        const msgBox = document.getElementById('work-messages');
+        const resultsBox = document.getElementById('lab5-results');
+        const resultsWrapper = document.getElementById('lab5-results_wrapper');
+
+        if (!playBtn || !workOverlay || !animArea) return;
+
+        const LS_KEY = 'lab5_anim_events';
+        let eventSeq = 0;
+        let intervalId = null;
+        const stepDelay = 16; //time ms
+        const radius = 10;
+
+        // balls
+        let red = { x: 0, y: 0, vx: 2, vy: 0 };
+        let green = { x: 0, y: 0, vx: 0, vy: 3 };
+
+        const ballRedEl = document.getElementById('ball-red');
+        const ballGreenEl = document.getElementById('ball-green');
+
+        function pushMessage(text) {
+            const time = new Date().toLocaleTimeString();
+            const p = document.createElement('div');
+            p.textContent = `${time}: ${text}`;
+            msgBox.prepend(p);
+        }
+
+        function logToLocalStorage(eventData) {
+            const list = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
+            const storageTime = new Date().toISOString();
+            list.push({
+                ...eventData,
+                storageTime
+            });
+            localStorage.setItem(LS_KEY, JSON.stringify(list));
+        }
+
+        async function logToServerImmediate(eventData) {
+            try {
+                await fetch('anim_events.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        mode: 'immediate',
+                        event: eventData
+                    })
+                });
+            } catch (e) {
+                console.error('Immediate log error:', e);
+            }
+        }
+
+        function logEvent(message) {
+            eventSeq++;
+            const clientTime = new Date().toISOString();
+            const eventData = {
+                seq: eventSeq,
+                msg: message,
+                clientTime
+            };
+
+            pushMessage(message);
+            logToLocalStorage(eventData);      // localstorage save
+            logToServerImmediate(eventData);   // server save
+        }
+
+        function setBallPositions() {
+            ballRedEl.style.left = red.x + 'px';
+            ballRedEl.style.top = red.y + 'px';
+            ballGreenEl.style.left = green.x + 'px';
+            ballGreenEl.style.top = green.y + 'px';
+        }
+        
+        // balls setup
+        function initBalls() {
+            const rect = animArea.getBoundingClientRect();
+            const maxX = rect.width - 2 * radius;
+            const maxY = rect.height - 2 * radius;
+
+            // red
+            red.x = 0;
+            red.y = Math.random() * maxY;
+            red.vx = 15; 
+            red.vy = 0;
+
+            // green
+            green.x = Math.random() * maxX; 
+            green.y = 0;
+            green.vx = 0;
+            green.vy = 20;
+
+            setBallPositions();
+            logEvent('reload: виставлено нові стартові позиції куль');
+        }
+
+        function step() {
+            const rect = animArea.getBoundingClientRect();
+            const maxX = rect.width - 2 * radius;
+            const maxY = rect.height - 2 * radius;
+
+            // move
+            red.x += red.vx;
+            red.y += red.vy;
+            green.x += green.vx;
+            green.y += green.vy;
+
+            // vertical collisios 
+            if (red.x <= 0) {
+                red.x = 0;
+                red.vx *= -1;
+                logEvent('червоний круг доторкнувся лівої стінки');
+            } else if (red.x >= maxX) {
+                red.x = maxX;
+                red.vx *= -1;
+                logEvent('червоний круг доторкнувся правої стінки');
+            }
+
+            // horizontal collisions
+            if (green.y <= 0) {
+                green.y = 0;
+                green.vy *= -1;
+                logEvent('зелений круг доторкнувся верхньої стінки');
+            } else if (green.y >= maxY) {
+                green.y = maxY;
+                green.vy *= -1;
+                logEvent('зелений круг доторкнувся нижньої стінки');
+            }
+
+            setBallPositions();
+
+            // ball contact
+            const centerRed = { x: red.x + radius, y: red.y + radius };
+            const centerGreen = { x: green.x + radius, y: green.y + radius };
+            const dx = centerRed.x - centerGreen.x;
+            const dy = centerRed.y - centerGreen.y;
+            const dist2 = dx * dx + dy * dy;
+            const minDist = 2 * radius;
+
+            if (dist2 <= minDist * minDist) {
+                stopAnimation();
+                logEvent('круги зіткнулись – анімацію зупинено');
+                //stop-hide, reload-show
+                stopBtn.classList.add('work-hidden');
+                reloadBtn.classList.remove('work-hidden');
+            } else {
+                //every step log
+                logEvent('крок анімації');
+            }
+        }
+
+        function startAnimation() {
+            if (intervalId !== null) return;
+            intervalId = setInterval(step, stepDelay);
+            startBtn.classList.add('work-hidden');
+            stopBtn.classList.remove('work-hidden');
+            reloadBtn.classList.add('work-hidden');
+            logEvent('натиснуто start – анімація запущена');
+        }
+
+        function stopAnimation() {
+            if (intervalId !== null) {
+                clearInterval(intervalId);
+                intervalId = null;
+                logEvent('натиснуто stop – анімація зупинена');
+            }
+        }
+
+        async function sendLocalEventsToServer() {
+            const list = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
+            if (!list.length) return;
+
+            try {
+                await fetch('anim_events.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        mode: 'local',
+                        events: list
+                    })
+                });
+            } catch (e) {
+                console.error('Sending local events error:', e);
+            }
+        }
+
+        async function loadEventsFromServerAndRender() {
+            try {
+                const resp = await fetch('anim_events.php?list=1');
+                const data = await resp.json();
+
+                const immediate = data.immediate || [];
+                const local = data.local || [];
+
+                let html = '<table><thead><tr>' +
+                    '<th colspan="3">Дані з сервера</th>' +
+                    '<th colspan="3">Дані з LocalStorage</th>' +
+                    '</tr><tr>' +
+                    '<th>#</th><th>Час сервера</th><th>Повідомлення</th>' +
+                    '<th>#</th><th>Час LocalStorage</th><th>Повідомлення</th>' +
+                    '</tr></thead><tbody>';
+
+                const maxLen = Math.max(immediate.length, local.length);
+                for (let i = 0; i < maxLen; i++) {
+                    const im = immediate[i];
+                    const lc = local[i];
+                    html += '<tr>';
+                    if (im) {
+                        html += `<td>${im.seq}</td><td>${im.time_server}</td><td>${im.msg}</td>`;
+                    } else {
+                        html += '<td></td><td></td><td></td>';
+                    }
+                    if (lc) {
+                        html += `<td>${lc.seq}</td><td>${lc.storage_time || ''}</td><td>${lc.msg}</td>`;
+                    } else {
+                        html += '<td></td><td></td><td></td>';
+                    }
+                    html += '</tr>';
+                }
+
+                html += '</tbody></table>';
+                resultsBox.innerHTML = html;
+                if (resultsWrapper) {
+                    if (immediate.length || local.length) {
+                        resultsWrapper.classList.remove('results-hidden');
+                    } else {
+                        resultsWrapper.classList.add('results-hidden');
+                    }
+                }
+            } catch (e) {
+                resultsBox.innerHTML = '<p style="color:red">Помилка отримання даних з сервера</p>';
+            }
+        }
+
+        // play button
+        playBtn.addEventListener('click', async () => {
+            // clear db n localstorage
+            localStorage.removeItem(LS_KEY);
+            eventSeq = 0;
+            msgBox.innerHTML = '';
+            resultsBox.innerHTML = '';
+            if (resultsWrapper) {
+                resultsWrapper.classList.add('results-hidden');
+            }
+
+            try {
+                await fetch('anim_events.php?clear=1', { method: 'POST' });
+            } catch (e) {
+                console.error('Не вдалося очистити anim_events:', e);
+            }
+
+            workOverlay.classList.remove('work-hidden');
+            initBalls();
+            logEvent('натиснуто play – work відкрито');
+        });
+
+        startBtn.addEventListener('click', startAnimation);
+        stopBtn.addEventListener('click', () => {
+            stopAnimation();
+            // stop-hide, start-show
+            stopBtn.classList.add('work-hidden');
+            startBtn.classList.remove('work-hidden');
+        });
+
+        reloadBtn.addEventListener('click', () => {
+            initBalls();
+            startBtn.classList.remove('work-hidden');
+            stopBtn.classList.add('work-hidden');
+            reloadBtn.classList.add('work-hidden');
+            logEvent('натиснуто reload');
+        });
+
+        closeBtn.addEventListener('click', async () => {
+            stopAnimation();
+            logEvent('натиснуто close – work закрито');
+            workOverlay.classList.add('work-hidden');
+
+            //from localstorage to server
+            await sendLocalEventsToServer();
+
+            //read both and render
+            await loadEventsFromServerAndRender();
+        });
+    }
+
+
 });

@@ -21,7 +21,8 @@ $menu = [
     "page3.php" => "Сторінка 3",
     "page4.php" => "Сторінка 4",
     "collapse_creator.php" => "Створення Collapse",
-    "collapse_viewer.php" => "Перегляд Collapse"
+    "collapse_viewer.php" => "Перегляд Collapse",
+    "lab5.php" => "Сторінка анімацій"
 ];
 
 $defaultTexts = [
@@ -64,7 +65,7 @@ $pageGenerationTime = round((microtime(true) - $pageGenerationStart) * 1000, 2);
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <title>Лабораторна робота №3</title>
+    <title>Лабораторна робота №5</title>
     <link rel="stylesheet" href="style.css?v=4">
     <script src="script.js?v=4" defer></script>
     <script>

@@ -1,0 +1,80 @@
+<?php
+include 'config.php';
+
+header('Content-Type: application/json; charset=utf-8');
+
+$raw = file_get_contents('php://input');
+$data = json_decode($raw, true);
+
+$method = $_SERVER['REQUEST_METHOD'];
+
+try {
+    if ($method === 'POST' && isset($_GET['clear'])) {
+        $pdo->exec("DELETE FROM anim_events");
+        echo json_encode(['status' => 'success', 'message' => 'Таблицю anim_events очищено'], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    if ($method === 'GET' && isset($_GET['list'])) {
+        $stmt = $pdo->query("SELECT method, seq, msg, time_server, time_client, storage_time 
+                             FROM anim_events ORDER BY id");
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $result = [
+            'immediate' => [],
+            'local' => []
+        ];
+
+        foreach ($rows as $row) {
+            $result[$row['method']][] = $row;
+        }
+
+        echo json_encode($result, JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    if ($method === 'POST' && is_array($data)) {
+        if (isset($data['mode']) && $data['mode'] === 'immediate' && isset($data['event'])) {
+            $e = $data['event'];
+
+            $stmt = $pdo->prepare("
+                INSERT INTO anim_events (method, seq, msg, time_server, time_client, storage_time)
+                VALUES ('immediate', ?, ?, NOW(), ?, NULL)
+            ");
+            $stmt->execute([
+                $e['seq'] ?? 0,
+                $e['msg'] ?? '',
+                isset($e['clientTime']) ? $e['clientTime'] : null
+            ]);
+
+            echo json_encode(['status' => 'success'], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        if (isset($data['mode']) && $data['mode'] === 'local' && isset($data['events']) && is_array($data['events'])) {
+            $stmt = $pdo->prepare("
+                INSERT INTO anim_events (method, seq, msg, time_server, time_client, storage_time)
+                VALUES ('local', ?, ?, NOW(), ?, ?)
+            ");
+
+            foreach ($data['events'] as $e) {
+                $stmt->execute([
+                    $e['seq'] ?? 0,
+                    $e['msg'] ?? '',
+                    isset($e['clientTime']) ? $e['clientTime'] : null,
+                    isset($e['storageTime']) ? $e['storageTime'] : null
+                ]);
+            }
+
+            echo json_encode(['status' => 'success'], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+    }
+
+    http_response_code(400);
+    echo json_encode(['status' => 'error', 'message' => 'Некоректний запит до anim_events.php'], JSON_UNESCAPED_UNICODE);
+
+} catch (PDOException $e) {
+    http_response_code(500);
+    echo json_encode(['status' => 'error', 'message' => 'DB error: ' . $e->getMessage()], JSON_UNESCAPED_UNICODE);
+}
