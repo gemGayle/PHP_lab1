@@ -278,9 +278,15 @@ document.addEventListener('DOMContentLoaded', function() {
             msgBox.prepend(p);
         }
 
+        function getLocalTimestamp() {
+            const d = new Date();
+            d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+            return d.toISOString().slice(0, 19).replace('T', ' ');
+        }
+
         function logToLocalStorage(eventData) {
             const list = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
-            const storageTime = new Date().toISOString();
+            const storageTime = getLocalTimestamp();
             list.push({
                 ...eventData,
                 storageTime
@@ -305,7 +311,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         function logEvent(message) {
             eventSeq++;
-            const clientTime = new Date().toISOString();
+            const clientTime = getLocalTimestamp();
             const eventData = {
                 seq: eventSeq,
                 msg: message,

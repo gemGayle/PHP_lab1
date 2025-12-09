@@ -2,6 +2,7 @@
 include 'config.php';
 
 header('Content-Type: application/json; charset=utf-8');
+date_default_timezone_set('Europe/Kyiv'); 
 
 $raw = file_get_contents('php://input');
 $data = json_decode($raw, true);
@@ -34,16 +35,19 @@ try {
     }
 
     if ($method === 'POST' && is_array($data)) {
+        $serverTime = date('Y-m-d H:i:s');
+        
         if (isset($data['mode']) && $data['mode'] === 'immediate' && isset($data['event'])) {
             $e = $data['event'];
 
             $stmt = $pdo->prepare("
                 INSERT INTO anim_events (method, seq, msg, time_server, time_client, storage_time)
-                VALUES ('immediate', ?, ?, NOW(), ?, NULL)
+                VALUES ('immediate', ?, ?, ?, ?, NULL)
             ");
             $stmt->execute([
                 $e['seq'] ?? 0,
                 $e['msg'] ?? '',
+                $serverTime,
                 isset($e['clientTime']) ? $e['clientTime'] : null
             ]);
 
@@ -54,13 +58,16 @@ try {
         if (isset($data['mode']) && $data['mode'] === 'local' && isset($data['events']) && is_array($data['events'])) {
             $stmt = $pdo->prepare("
                 INSERT INTO anim_events (method, seq, msg, time_server, time_client, storage_time)
-                VALUES ('local', ?, ?, NOW(), ?, ?)
+                VALUES ('local', ?, ?, ?, ?, ?)
             ");
 
             foreach ($data['events'] as $e) {
+                $serverTimeLocal = date('Y-m-d H:i:s');
+
                 $stmt->execute([
                     $e['seq'] ?? 0,
                     $e['msg'] ?? '',
+                    $serverTimeLocal,
                     isset($e['clientTime']) ? $e['clientTime'] : null,
                     isset($e['storageTime']) ? $e['storageTime'] : null
                 ]);
